@@ -1,21 +1,22 @@
-package main
+package deck
 
 import (
+	"blackjack/card"
 	"log/slog"
 	"math/rand"
 )
 
-type Deck []Card
+type Deck []card.Card
 
 func generateDeck() Deck {
 	// Generate a deck of cards from rank and suits
 	slog.Debug("Generating Deck")
 	deck := make(Deck, 0)
 
-	for rK := range Ranks {
-		for sK := range Suits {
-			card := Card{
-				Suit: Suits[sK],
+	for rK := range card.Ranks {
+		for sK := range card.Suits {
+			card := card.Card{
+				Suit: card.Suits[sK],
 				Rank: rK,
 			}
 
@@ -50,9 +51,9 @@ func LoadDeck() Deck {
 	return deck
 }
 
-func (deckPtr *Deck) Draw() Card {
+func (deckPtr *Deck) Draw() card.Card {
 	slog.Debug("Drawing a card")
-	var card Card
+	var card card.Card
 	deck := *deckPtr
 	// draw a card from a deck checking if it is the last card
 	if deck.IsLastCard() {

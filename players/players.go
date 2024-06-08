@@ -1,17 +1,22 @@
-package main
+package players
 
-import "log/slog"
+import (
+	c "blackjack/card"
+	d "blackjack/deck"
+	p "blackjack/player"
+	"log/slog"
+)
 
-type Players map[string]Player
+type Players map[string]p.Player
 
 func (ps Players) ResetHands() {
 	for k, v := range ps {
-		v.Hand = Hand{}
+		v.Hand = c.Hand{}
 		ps[k] = v
 	}
 }
 
-func (ps Players) LoadHands(deck *Deck) {
+func (ps Players) LoadHands(deck *d.Deck) {
 	for k, v := range ps {
 		v.LoadHand(deck)
 		slog.Debug("player has hand", "hand", v.Hand)
@@ -26,17 +31,18 @@ func (ps Players) PrintScores() {
 }
 
 func LoadPlayers() Players {
-	dealer := Player{
-		isDealer: true,
+	dealer := p.Player{
+		IsDealer: true,
 		Name:     "Dealer",
-		Hand:     []Card{},
+		Hand:     []c.Card{},
 		Score:    0,
-		isAi:     false,
+		IsAi:     false,
 	}
 
-	players := map[string]Player{DealerKey: dealer}
+	players := map[string]p.Player{}
+	players[p.DealerKey] = dealer
 
-	player := CreatePlayer()
+	player := p.CreatePlayer()
 
 	players[player.Name] = player
 

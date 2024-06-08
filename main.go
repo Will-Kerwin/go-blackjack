@@ -1,14 +1,15 @@
 package main
 
 import (
+	d "blackjack/deck"
+	p "blackjack/player"
+	ps "blackjack/players"
 	"fmt"
 	"log/slog"
 	"os"
 	"os/signal"
 	"syscall"
 )
-
-const blackjackLim int = 21
 
 func main() {
 	slog.SetLogLoggerLevel(slog.LevelInfo)
@@ -26,7 +27,7 @@ func main() {
 	fmt.Println("BlackJack!!!!")
 	fmt.Println("\tBy Will Kerwin")
 
-	players := LoadPlayers()
+	players := ps.LoadPlayers()
 	defer players.PrintScores()
 
 	for {
@@ -46,8 +47,8 @@ func main() {
 	}
 }
 
-func PlayGame(players Players, rounds int) {
-	deck := LoadDeck()
+func PlayGame(players ps.Players, rounds int) {
+	deck := d.LoadDeck()
 
 	fmt.Printf("Playing %d rounds of blackjack\n", rounds)
 
@@ -60,16 +61,16 @@ func PlayGame(players Players, rounds int) {
 
 		// loop round
 		for !roundComplete {
-			dealer := players[DealerKey]
+			dealer := players[p.DealerKey]
 
 			dealer.PrintHand()
 			fmt.Println()
 
 			dealer.IsInitiallyBust()
-			players[DealerKey] = dealer
+			players[p.DealerKey] = dealer
 
 			for k, v := range players {
-				if v.isDealer {
+				if v.IsDealer {
 					continue
 				}
 				roundComplete = v.PlayHand(&deck)
@@ -77,11 +78,11 @@ func PlayGame(players Players, rounds int) {
 			}
 
 			dealer.PlayDealerHand(&deck)
-			players[DealerKey] = dealer
+			players[p.DealerKey] = dealer
 
 			if !dealer.IsBust() {
 				for k, v := range players {
-					if v.isDealer {
+					if v.IsDealer {
 						continue
 					}
 					if v.TotalHand() >= dealer.TotalHand() && !v.IsBust() {
@@ -92,7 +93,7 @@ func PlayGame(players Players, rounds int) {
 							continue
 						}
 						dealer.Score += 1
-						players[DealerKey] = dealer
+						players[p.DealerKey] = dealer
 					}
 				}
 			}

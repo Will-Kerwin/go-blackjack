@@ -1,18 +1,21 @@
-package main
+package player
 
 import (
+	c "blackjack/card"
+	d "blackjack/deck"
 	"fmt"
 	"log/slog"
 )
 
 const DealerKey string = "dealer"
 const DealerStickLim int = 17
+const BlackjackLim int = 21
 
 type Player struct {
-	Hand     Hand
+	Hand     c.Hand
 	Name     string
-	isDealer bool
-	isAi     bool
+	IsDealer bool
+	IsAi     bool
 	Score    int
 }
 
@@ -27,7 +30,7 @@ func (p Player) TotalHand() int {
 
 func (p Player) PrintHand() {
 	fmt.Println()
-	if p.isDealer {
+	if p.IsDealer {
 		fmt.Println("Dealer Hand:")
 		if p.IsAtDealerStickLim() {
 			fmt.Println("Dealer will stick!")
@@ -42,7 +45,7 @@ func (p Player) PrintHand() {
 }
 
 func (p Player) PrintScore() {
-	if p.isDealer {
+	if p.IsDealer {
 		fmt.Printf("Dealer Score: %d\n", p.Score)
 	} else {
 		fmt.Printf("%s Score: %d\n", p.Name, p.Score)
@@ -63,14 +66,14 @@ func (p Player) HasBlackjack() (has21 bool, blackjack bool) {
 		}
 	}
 
-	return p.TotalHand() == blackjackLim, len(p.Hand) == 2 && hasAce && hasFace
+	return p.TotalHand() == BlackjackLim, len(p.Hand) == 2 && hasAce && hasFace
 }
 
 func (p Player) IsBust() bool {
-	return p.TotalHand() > blackjackLim
+	return p.TotalHand() > BlackjackLim
 }
 
-func (p *Player) LoadHand(deck *Deck) {
+func (p *Player) LoadHand(deck *d.Deck) {
 	slog.Debug("Loading hand for player", "name", p.Name)
 	for i := 0; i < 2; i++ {
 		p.Hand = append(p.Hand, deck.Draw())
@@ -87,15 +90,15 @@ func CreatePlayer() Player {
 	fmt.Scanln(&playerName)
 
 	return Player{
-		Hand:     []Card{},
+		Hand:     c.Hand{},
 		Name:     playerName,
-		isAi:     false,
-		isDealer: false,
+		IsAi:     false,
+		IsDealer: false,
 		Score:    0,
 	}
 }
 
-func (p *Player) PlayHand(deck *Deck) bool {
+func (p *Player) PlayHand(deck *d.Deck) bool {
 	var option int
 	for {
 		p.PrintHand()
@@ -129,7 +132,7 @@ func (p Player) IsAtDealerStickLim() bool {
 	return p.TotalHand() > DealerStickLim
 }
 
-func (p *Player) PlayDealerHand(deck *Deck) {
+func (p *Player) PlayDealerHand(deck *d.Deck) {
 	for {
 		p.PrintHand()
 		if has21, blackjack := p.HasBlackjack(); has21 {
