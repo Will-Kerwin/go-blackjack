@@ -28,13 +28,16 @@ func generateDeck() Deck {
 	return deck
 }
 
-func shuffleDeck(c Deck) {
+func (d *Deck) shuffleDeck() {
 	// shuffle a deck of cards randomly based on length
 	slog.Debug("Shuffling Deck")
-	for i := range c {
-		j := rand.Intn(len(c) - 1)
-		c[i], c[j] = c[j], c[i]
+	deck := *d
+	for i := range deck {
+		j := rand.Intn(len(deck) - 1)
+		deck[i], deck[j] = deck[j], deck[i]
 	}
+
+	*d = deck
 }
 
 func LoadDeck() Deck {
@@ -42,17 +45,17 @@ func LoadDeck() Deck {
 
 	deck := generateDeck()
 
-	shuffleDeck(deck)
+	deck.shuffleDeck()
 
 	return deck
 }
 
-func Draw(deckPtr *Deck) Card {
+func (deckPtr *Deck) Draw() Card {
 	slog.Debug("Drawing a card")
 	var card Card
 	deck := *deckPtr
 	// draw a card from a deck checking if it is the last card
-	if IsLastCard(deck) {
+	if deck.IsLastCard() {
 		card = deck[0]
 		slog.Debug("Drew", "card", card)
 		*deckPtr = LoadDeck()
@@ -65,17 +68,6 @@ func Draw(deckPtr *Deck) Card {
 	return card
 }
 
-func IsLastCard(deck Deck) bool {
+func (deck Deck) IsLastCard() bool {
 	return len(deck) == 1
-}
-
-func LoadHand(player Player, deck *Deck) Player {
-	slog.Debug("Loading hand for player", "name", player.Name)
-	for i := 0; i < 2; i++ {
-		player.Hand = append(player.Hand, Draw(deck))
-	}
-
-	slog.Debug("Player has hand of cards", "name", player.Name, "handLen", len(player.Hand))
-
-	return player
 }

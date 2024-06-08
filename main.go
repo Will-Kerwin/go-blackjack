@@ -27,6 +27,7 @@ func main() {
 	fmt.Println("\tBy Will Kerwin")
 
 	players := LoadPlayers()
+	defer players.PrintScores()
 
 	for {
 		menuOption := Menu()
@@ -50,73 +51,58 @@ func PlayGame(players Players, rounds int) {
 
 	fmt.Printf("Playing %d rounds of blackjack\n", rounds)
 
+	// run for total rounds provided
 	for i := 0; i < rounds; i++ {
-		fmt.Printf("Round %d\n\n", i+1)
+		fmt.Printf("\n\n***Round %d***\n\n", i+1)
 		var roundComplete bool
 
 		players.LoadHands(&deck)
 
+		// loop round
 		for !roundComplete {
 			dealer := players[DealerKey]
 
 			dealer.PrintHand()
 			fmt.Println()
 
-			if has21, blackjack := players[DealerKey].HasBlackjack(); has21 {
-				dealer.PrintHand()
-				dealer.Score += 1
-				if blackjack {
-					dealer.Score += 2
-					fmt.Println("Dealer has blackjack")
-				} else {
-					fmt.Println("Dealer Has 21")
-				}
-
-				players[DealerKey] = dealer
-			} else if players[DealerKey].IsBust() {
-				fmt.Println("Dealer Bust")
-			}
+			dealer.IsInitiallyBust()
+			players[DealerKey] = dealer
 
 			for k, v := range players {
 				if v.isDealer {
 					continue
 				}
-				var option int
-				for {
-					v.PrintHand()
-					if has21, blackjack := v.HasBlackjack(); has21 {
+				roundComplete = v.PlayHand(&deck)
+				players[k] = v
+			}
+
+			dealer.PlayDealerHand(&deck)
+			players[DealerKey] = dealer
+
+			if !dealer.IsBust() {
+				for k, v := range players {
+					if v.isDealer {
+						continue
+					}
+					if v.TotalHand() >= dealer.TotalHand() && !v.IsBust() {
 						v.Score += 1
-						if blackjack {
-							v.Score += 2
-							fmt.Printf("%s has blackjack\n", k)
-						} else {
-							fmt.Printf("%s Has 21\n", k)
-						}
-
 						players[k] = v
-						roundComplete = true
-						break
-					} else if v.IsBust() {
-						fmt.Println("You are bust")
-						roundComplete = true
-						break
+					} else {
+						if d21, _ := dealer.HasBlackjack(); d21 || dealer.IsBust() {
+							continue
+						}
+						dealer.Score += 1
+						players[DealerKey] = dealer
 					}
-
-					fmt.Print("Please enter 0 for stick and 1 for hit: ")
-					fmt.Scanln(&option)
-
-					if option == 0 {
-						break
-					}
-
-					v.Hand = append(v.Hand, Draw(&deck))
-					players[k] = v
 				}
 			}
+
 		}
 
 		players.ResetHands()
 	}
+
+	players.PrintScores()
 }
 
 func Menu() int {
