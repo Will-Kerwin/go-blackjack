@@ -98,6 +98,7 @@ func CreatePlayer() Player {
 	}
 }
 
+// TODO: Ace 1 or 11
 func (p *Player) PlayHand(deck *d.Deck) bool {
 	var option int
 	for {
