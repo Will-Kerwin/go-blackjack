@@ -5,10 +5,12 @@ import (
 	"math/rand"
 )
 
-func GenerateDeck(c *[]Card) {
+type Deck []Card
+
+func generateDeck() Deck {
 	// Generate a deck of cards from rank and suits
 	slog.Debug("Generating Deck")
-	deck := make([]Card, 0)
+	deck := make(Deck, 0)
 
 	for rK := range Ranks {
 		for sK := range Suits {
@@ -21,11 +23,12 @@ func GenerateDeck(c *[]Card) {
 		}
 	}
 
-	*c = deck
-	slog.Debug("Generated deck of cards", "len", len(*c))
+	slog.Debug("Generated deck of cards", "len", len(deck))
+
+	return deck
 }
 
-func Shuffle(c []Card) {
+func shuffleDeck(c Deck) {
 	// shuffle a deck of cards randomly based on length
 	slog.Debug("Shuffling Deck")
 	for i := range c {
@@ -34,18 +37,17 @@ func Shuffle(c []Card) {
 	}
 }
 
-func LoadDeck() []Card {
+func LoadDeck() Deck {
 	// load a shuffled deck
-	var deck []Card
 
-	GenerateDeck(&deck)
+	deck := generateDeck()
 
-	Shuffle(deck)
+	shuffleDeck(deck)
 
 	return deck
 }
 
-func Draw(deckPtr *[]Card) Card {
+func Draw(deckPtr *Deck) Card {
 	slog.Debug("Drawing a card")
 	var card Card
 	deck := *deckPtr
@@ -63,11 +65,11 @@ func Draw(deckPtr *[]Card) Card {
 	return card
 }
 
-func IsLastCard(deck []Card) bool {
+func IsLastCard(deck Deck) bool {
 	return len(deck) == 1
 }
 
-func LoadHand(player Player, deck *[]Card) Player {
+func LoadHand(player Player, deck *Deck) Player {
 	slog.Debug("Loading hand for player", "name", player.Name)
 	for i := 0; i < 2; i++ {
 		player.Hand = append(player.Hand, Draw(deck))

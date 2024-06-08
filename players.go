@@ -65,7 +65,7 @@ func (ps Players) ResetHands() {
 	}
 }
 
-func (ps Players) LoadHands(deck *[]Card) {
+func (ps Players) LoadHands(deck *Deck) {
 	for k, v := range ps {
 		ps[k] = LoadHand(v, deck)
 	}
